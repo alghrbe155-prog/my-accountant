@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<link rel="manifest" href="data:application/json;charset=utf-8,{
+  \"name\": \"المحاسب الذكي\",
+  \"short_name\": \"حساباتي\",
+  \"start_url\": \".\",
+  \"display\": \"standalone\",
+  \"background_color\": \"#0a0f1e\",
+  \"theme_color\": \"#0072ff\",
+  \"icons\": [
+    {
+      \"src\": \"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%230072ff' rx='20'/%3E%3Ctext x='50' y='68' font-size='50' text-anchor='middle' fill='white' font-family='Arial'%3E📊%3C/text%3E%3C/svg%3E\",
+      \"sizes\": \"any\",
+      \"type\": \"image/svg+xml\"
+    }
+  ]
+}">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>المحاسب الذكي | الإصدار الأسطوري</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Cairo', sans-serif; transition: all 0.2s ease; }
+        :root { --bg-start: #eef2f5; --bg-end: #d9e2ec; --card: #ffffff; --text: #1e293b; --text-sec: #334155; --header-bg: rgba(255,255,255,0.7); --border: #cbd5e1; --accent: #0072ff; --table-header: #f1f5f9; }
+        body.dark { --bg-start: #0a0f1e; --bg-end: #020617; --card: #1e293b; --text: #f8fafc; --text-sec: #cbd5e1; --header-bg: rgba(15,23,42,0.7); --border: #334155; --accent: #00c6ff; --table-header: #0f172a; }
+        body { background: radial-gradient(circle at 20% 30%, var(--bg-start), var(--bg-end)); color: var(--text); padding: 30px 20px; min-height: 100vh; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 45px; background: var(--header-bg); backdrop-filter: blur(8px); padding: 10px 25px; border-radius: 50px; border: 1px solid var(--border); }
+        .logo h1 { font-size: 26px; background: linear-gradient(135deg, var(--accent), #00c6ff); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .right-section { display: flex; gap: 12px; align-items: center; }
+        .date-box { background: var(--card); padding: 8px 22px; border-radius: 40px; font-weight: 600; border: 1px solid var(--accent); font-size: 14px; }
+        .theme-toggle { background: var(--card); border: 1px solid var(--accent); width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 24px; }
+        .menu-square-btn { background: linear-gradient(145deg, #0072ff, #00c6ff); width: 48px; height: 48px; border-radius: 16px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 24px; border: none; color: white; transition: 0.2s; box-shadow: 0 4px 10px rgba(0,114,255,0.3); }
+        .menu-square-btn:hover { transform: scale(1.03); border-radius: 12px; }
+        .balances-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; margin-top: 20px; }
+        .balance-card { background: var(--card); border-radius: 32px; padding: 28px 12px; text-align: center; cursor: pointer; border: 1px solid var(--border); box-shadow: 0 8px 20px rgba(0,0,0,0.1); transition: 0.25s; }
+        .balance-card:hover { transform: translateY(-6px); border-color: var(--accent); }
+        .balance-card h4 { font-size: 18px; color: var(--text-sec); margin-bottom: 12px; }
+        .balance-card .amount { font-size: 32px; font-weight: 800; color: var(--accent); }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.96); backdrop-filter: blur(12px); z-index: 1000; align-items: center; justify-content: center; }
+        .modal-card { background: var(--card); border-radius: 48px; width: 95%; max-width: 550px; padding: 28px; border: 1px solid var(--accent); }
+        .modal-card h3 { color: var(--accent); margin-bottom: 20px; }
+        .modal-card input, .modal-card select, .modal-card textarea { width: 100%; padding: 12px; margin-bottom: 14px; border-radius: 30px; background: var(--card); border: 1px solid var(--border); color: var(--text); }
+        .modal-card button { background: var(--accent); border: none; padding: 12px; border-radius: 40px; font-weight: bold; width: 100%; cursor: pointer; margin-top: 8px; color: white; }
+        .close-btn { background: #475569; }
+        .clients-modal-large { max-width: 1300px; width: 95%; max-height: 90vh; overflow-y: auto; }
+        .client-list { margin-bottom: 20px; }
+        .client-item { background: var(--card); border-radius: 30px; padding: 15px 20px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; border: 1px solid var(--border); }
+        .client-name { font-weight: bold; font-size: 1.2rem; }
+        .client-balance { font-weight: 800; color: var(--accent); }
+        .add-client-btn { background: #10b981; border: none; padding: 12px; border-radius: 40px; font-weight: bold; width: 100%; margin-bottom: 20px; color: white; cursor: pointer; }
+        .action-dialog { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); z-index: 3000; align-items: center; justify-content: center; }
+        .action-card { background: var(--card); border-radius: 56px; padding: 28px 20px; width: 90%; max-width: 380px; text-align: center; border: 1px solid var(--accent); }
+        .action-grid { display: flex; flex-direction: column; gap: 14px; margin: 20px 0; }
+        .action-btn-custom { background: var(--accent); border: none; padding: 14px; border-radius: 60px; font-weight: bold; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 12px; }
+        .client-stats-footer { display: flex; justify-content: space-around; gap: 20px; margin: 25px 0 20px; background: var(--card); padding: 18px; border-radius: 40px; }
+        .trans-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        .trans-table th, .trans-table td { padding: 12px 8px; border-bottom: 1px solid var(--border); text-align: center; }
+        .trans-table th { background: var(--table-header); color: var(--accent); }
+        .floating-add-btn { background: var(--accent); width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: bold; border: none; color: white; cursor: pointer; margin: 10px 0 0 auto; }
+        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #10b981; color: white; padding: 12px 28px; border-radius: 50px; z-index: 1100; display: none; font-weight: bold; }
+        .premium-drawer { position: fixed; top: 0; right: -420px; width: 100%; max-width: 380px; height: 100vh; background: rgba(15, 25, 45, 0.98); backdrop-filter: blur(28px); z-index: 2500; transition: right 0.45s ease; border-left: 3px solid #00c6ff; box-shadow: -15px 0 40px rgba(0,0,0,0.5); padding: 28px 22px; display: flex; flex-direction: column; color: #f1f5f9; direction: rtl; }
+        .premium-drawer.open { right: 0; }
+        .drawer-header-premium { display: flex; justify-content: space-between; align-items: center; margin-bottom: 35px; padding-bottom: 18px; border-bottom: 1px solid rgba(0,198,255,0.4); }
+        .drawer-header-premium h2 { font-size: 1.8rem; background: linear-gradient(135deg, #fff, #00c6ff); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .close-drawer-premium { background: rgba(255,255,255,0.1); border: 1px solid rgba(0,198,255,0.4); width: 44px; height: 44px; border-radius: 40px; font-size: 26px; cursor: pointer; color: #00c6ff; transition: 0.25s; display: flex; align-items: center; justify-content: center; }
+        .close-drawer-premium:hover { background: #ef4444; color: white; transform: rotate(90deg); }
+        .user-glass-card { background: rgba(255,255,255,0.08); border-radius: 48px; padding: 20px 16px; margin-bottom: 32px; text-align: center; border: 1px solid rgba(0,198,255,0.3); }
+        .user-avatar-premium { width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 14px; background: linear-gradient(145deg, #0072ff, #00c6ff); display: flex; align-items: center; justify-content: center; font-size: 38px; }
+        .user-email-premium { font-weight: 700; font-size: 1rem; background: rgba(0,0,0,0.4); display: inline-block; padding: 6px 16px; border-radius: 60px; margin-top: 8px; }
+        .btn-backup-premium { background: linear-gradient(135deg, #f59e0b, #ea580c); border: none; width: 100%; padding: 14px; border-radius: 60px; font-weight: bold; font-size: 1rem; color: white; display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; margin-top: 20px; }
+        .stats-premium { margin-top: 32px; padding-top: 20px; border-top: 1px solid rgba(0,198,255,0.2); }
+        .stat-item-premium { display: flex; justify-content: space-between; margin-bottom: 14px; font-size: 0.9rem; }
+        .stat-label { color: #94a3b8; }
+        .stat-value { font-weight: bold; color: #00c6ff; }
+        .premium-toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #1e293b; backdrop-filter: blur(20px); border: 1px solid #00c6ff; color: white; padding: 12px 28px; border-radius: 60px; z-index: 3000; display: none; font-weight: bold; }
+        @media (max-width: 600px) { .balances-grid { gap: 16px; } .balance-card .amount { font-size: 24px; } }
+    </style>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0072ff">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="المحاسب الذكي">
+<link rel="apple-touch-icon" href="icons/icon-152.png">
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div class="logo"><h1>📊 المحاسب الذكي</h1></div>
+        <div class="right-section">
+            <div class="date-box" id="currentDate"></div>
+            <div class="theme-toggle" id="themeToggle">🌙</div>
+            <button class="menu-square-btn" id="legendaryMenuBtn">✨</button>
+        </div>
+    </div>
+    <div class="balances-grid" id="balancesGrid"></div>
+</div>
+
+<!-- مودالات التطبيق الأساسية -->
+<div id="clientsModal" class="modal"><div class="modal-card clients-modal-large"><h3>👥 إدارة العملاء</h3><button class="add-client-btn" id="openAddClientMain">➕ إضافة عميل جديد</button><div id="clientsListContainer" class="client-list"></div><button class="close-btn" id="closeClientsModal">إغلاق</button></div></div>
+<div id="clientDetailModal" class="modal"><div class="modal-card clients-modal-large"><div style="display: flex; justify-content: space-between;"><h3 id="detailClientName">🌟 العميل</h3><button id="openAddTransForClient" class="floating-add-btn">+</button></div><div style="overflow-x: auto;"><table class="trans-table" id="clientTransactionsTable"><thead><tr><th>التاريخ</th><th>البيان</th><th>المبلغ</th><th></th></tr></thead><tbody id="clientTransactionsBody"></tbody></table></div><div id="detailStatsFooter" class="client-stats-footer"></div><button class="close-btn" id="closeDetailModal">إيقاف</button></div></div>
+<div id="addClientModal" class="modal"><div class="modal-card"><h3 id="clientFormTitle">➕ عميل جديد</h3><input type="text" id="clientName" placeholder="الاسم الكامل *"><input type="tel" id="clientPhone" placeholder="رقم الجوال"><input type="number" id="creditLimit" placeholder="سقف المديونية"><textarea id="clientNotes" rows="2" placeholder="ملاحظات"></textarea><div><label><input type="checkbox" id="openingCheck"> إضافة رصيد افتتاحي</label><div id="openingFields" style="display:none;"><input type="number" id="openingAmount" placeholder="المبلغ"><select id="openingType"><option value="paid">له (رصيد مدفوع)</option><option value="due">عليه (رصيد مستحق)</option></select></div></div><button id="saveClientBtn">💾 حفظ</button><button id="cancelClientBtn" class="close-btn">إلغاء</button></div></div>
+<div id="transModal" class="modal"><div class="modal-card"><h3>📝 مسند جديد</h3><select id="transType"><option value="قبض">💵 سند قبض (له)</option><option value="صرف">💸 سند صرف (عليه)</option></select><input type="number" id="transAmount" placeholder="المبلغ بالريال"><select id="paymentMethod"><option value="نقدية">نقدية</option><option value="بنك">بنك</option><option value="شيك">شيك</option></select><textarea id="transDesc" rows="2" placeholder="البيان (اختياري)"></textarea><button id="confirmTransBtn">حفظ المعاملة</button><button id="cancelTransBtn" class="close-btn">إلغاء</button></div></div>
+<div id="accountModal" class="modal"><div class="modal-card"><h3 id="accountModalTitle">الحساب</h3><select id="accOperation"><option value="add">إضافة رصيد (+)</option><option value="sub">خصم رصيد (-)</option></select><input type="number" id="accAmount" placeholder="المبلغ"><textarea id="accDesc" rows="2" placeholder="الوصف"></textarea><button id="saveAccountOp">تنفيذ</button><button id="closeAccountModal" class="close-btn">إغلاق</button></div></div>
+<div id="actionDialog" class="action-dialog"><div class="action-card"><h3 id="dialogClientName">اختر إجراء</h3><div class="action-grid" id="actionButtonsContainer"></div><button class="action-btn-custom close-dialog-btn" id="closeActionDialog">إلغاء</button></div></div>
+
+<!-- القائمة الجانبية -->
+<div id="premiumDrawer" class="premium-drawer">
+    <div class="drawer-header-premium"><h2>📁 الخزنة الذهبية</h2><button class="close-drawer-premium" id="closeDrawerPremiumBtn">✕</button></div>
+    <div class="user-glass-card"><div class="user-avatar-premium">💾</div><div class="user-email-premium">نسخة احتياطية محلية</div><div class="login-status-premium">بدون تسجيل دخول - تحميل فوري</div></div>
+    <button id="premiumBackupBtn" class="btn-backup-premium"><span>📥</span> تحميل نسخة احتياطية (JSON)</button>
+    <div class="stats-premium">
+        <div class="stat-item-premium"><span class="stat-label">📦 حجم البيانات</span><span class="stat-value" id="premiumDataSize">0 KB</span></div>
+        <div class="stat-item-premium"><span class="stat-label">🕒 آخر نسخة</span><span class="stat-value" id="premiumLastBackup">—</span></div>
+        <div class="stat-item-premium"><span class="stat-label">🔒 طريقة الحفظ</span><span class="stat-value">تحميل مباشر</span></div>
+    </div>
+</div>
+<div id="premiumToast" class="premium-toast">✨ تمت العملية</div>
+<div id="toast" class="toast">✅ تمت العملية</div>
+
+<script>
+    // ================== البيانات الأساسية ==================
+    let accounts = { "مواردين":0, "عملاء":0, "ديون":0, "موظفين":0, "أخرى":0, "صرفيات":0 };
+    let transactions = [];
+    let clients = [];
+    let currentOpenClient = null;
+    let editingTransId = null;
+
+    function loadData() {
+        const stored = localStorage.getItem("full_backup");
+        if(stored) {
+            try { const data = JSON.parse(stored); if(data.clients) clients = data.clients; if(data.transactions) transactions = data.transactions; } catch(e) {}
+        }
+        if(clients.length === 0) clients.push({ id: Date.now(), name: "علي سالم", phone: "05xxxxxxx", creditLimit: 0, notes: "" });
+        updateAccountsTotals();
+        saveToLocal();
+        renderBalances();
+    }
+    function updateAccountsTotals() {
+        accounts = { "مواردين":0, "عملاء":0, "ديون":0, "موظفين":0, "أخرى":0, "صرفيات":0 };
+        let totalClientsPaid = 0, totalClientsDue = 0;
+        for (let t of transactions) {
+            if (t.clientName) {
+                if (t.type === "قبض") totalClientsPaid += t.amount;
+                else if (t.type === "صرف") totalClientsDue += t.amount;
+            } else if (t.accountName) accounts[t.accountName] = (accounts[t.accountName] || 0) + t.amount;
+        }
+        accounts["عملاء"] = totalClientsPaid - totalClientsDue;
+        accounts["ديون"] = totalClientsDue;
+    }
+    function saveToLocal() { localStorage.setItem("full_backup", JSON.stringify({ clients, transactions, accounts })); }
+    function renderBalances() {
+        updateAccountsTotals();
+        const grid = document.getElementById("balancesGrid");
+        const items = [
+            { key:"مواردين", label:"المواردين", icon:"🏭" }, { key:"عملاء", label:"العملاء", icon:"👥" },
+            { key:"ديون", label:"الديون", icon:"💳" }, { key:"موظفين", label:"الموظفين", icon:"👨‍💼" },
+            { key:"أخرى", label:"أخرى", icon:"📦" }, { key:"صرفيات", label:"الصرفيات", icon:"💸" }
+        ];
+        let html = "";
+        items.forEach(item => { let amount = accounts[item.key] || 0; html += `<div class="balance-card" data-account="${item.key}"><h4>${item.icon} ${item.label}</h4><div class="amount">${amount.toLocaleString()} ريال</div></div>`; });
+        grid.innerHTML = html;
+        document.querySelectorAll(".balance-card").forEach(card => { card.addEventListener("click", () => { const acc = card.getAttribute("data-account"); if(acc === "عملاء") openClientsModal(); else openAccountModal(acc); }); });
+    }
+    function getClientBalance(clientName) { let bal = 0; for(let t of transactions) if(t.clientName === clientName) bal += (t.type === "قبض" ? t.amount : -t.amount); return bal; }
+    function renderClientsList() {
+        const container = document.getElementById("clientsListContainer");
+        if(clients.length === 0) { container.innerHTML = "<div style='text-align:center'>✨ لا يوجد عملاء</div>"; return; }
+        let html = "";
+        clients.forEach(client => { let balance = getClientBalance(client.name); html += `<div class="client-item" data-name="${client.name}"><div class="client-name">${client.name}</div><div class="client-balance">${balance.toLocaleString()} ريال</div><div><button class="edit-client-btn" data-id="${client.id}" style="background:#f59e0b; border:none; border-radius:30px; padding:5px 12px;">✏️</button><button class="delete-client-btn" data-id="${client.id}" style="background:#ef4444; border:none; border-radius:30px; padding:5px 12px;">🗑️</button></div></div>`; });
+        container.innerHTML = html;
+        document.querySelectorAll(".client-item").forEach(el => { const name = el.getAttribute("data-name"); el.addEventListener("click", (e) => { if(!e.target.classList.contains("edit-client-btn") && !e.target.classList.contains("delete-client-btn")) openClientDetail(name); }); let timer; const start = (e) => { if(e.target.classList.contains("edit-client-btn")||e.target.classList.contains("delete-client-btn")) return; timer = setTimeout(()=> showActionDialog(name), 500); }; const cancel = () => clearTimeout(timer); el.addEventListener("touchstart", start); el.addEventListener("touchend", cancel); el.addEventListener("touchmove", cancel); el.addEventListener("mousedown", start); el.addEventListener("mouseup", cancel); el.addEventListener("mouseleave", cancel); });
+        document.querySelectorAll(".edit-client-btn").forEach(btn => btn.addEventListener("click", (e) => { e.stopPropagation(); editClientById(parseInt(btn.getAttribute("data-id"))); }));
+        document.querySelectorAll(".delete-client-btn").forEach(btn => btn.addEventListener("click", (e) => { e.stopPropagation(); deleteClientById(parseInt(btn.getAttribute("data-id"))); }));
+    }
+    function openClientsModal() { renderClientsList(); document.getElementById("clientsModal").style.display = "flex"; }
+    function openClientDetail(clientName) { currentOpenClient = clientName; document.getElementById("detailClientName").innerHTML = `🌟 ${clientName}`; renderClientTransactions(clientName); updateClientStatsFooter(clientName); document.getElementById("clientDetailModal").style.display = "flex"; }
+    function updateClientStatsFooter(clientName) { let totalIn=0,totalOut=0; transactions.forEach(t=>{if(t.clientName===clientName){if(t.type==="قبض") totalIn+=t.amount; else totalOut+=t.amount;}}); document.getElementById("detailStatsFooter").innerHTML = `<div><strong>💰 له:</strong> ${totalIn.toLocaleString()} ريال</div><div><strong>📉 عليه:</strong> ${totalOut.toLocaleString()} ريال</div><div><strong>⚖️ الرصيد:</strong> ${(totalIn-totalOut).toLocaleString()} ريال</div>`; }
+    function renderClientTransactions(clientName) { let filtered = transactions.filter(t=>t.clientName===clientName).sort((a,b)=>new Date(a.date)-new Date(b.date)); const tbody = document.getElementById("clientTransactionsBody"); if(filtered.length===0){ tbody.innerHTML="<tr><td colspan='4'>✨ لا توجد معاملات</td></tr>"; return; } let html=""; filtered.forEach(t=>{ html+=`<tr><td>${t.date}</td><td>${t.description||"—"} (${t.paymentMethod||"نقدية"})</td><td>${t.amount.toLocaleString()} ريال</td><td><button class="edit-trans" data-id="${t.id}" style="background:#f59e0b; border:none; border-radius:30px; padding:5px 10px;">✏️</button> <button class="delete-trans" data-id="${t.id}" style="background:#ef4444; border:none; border-radius:30px; padding:5px 10px;">🗑️</button></td></tr>`; }); tbody.innerHTML=html; document.querySelectorAll(".edit-trans").forEach(btn=>btn.addEventListener("click",()=>openEditTransaction(parseInt(btn.getAttribute("data-id"))))); document.querySelectorAll(".delete-trans").forEach(btn=>btn.addEventListener("click",()=>deleteTransaction(parseInt(btn.getAttribute("data-id"))))); }
+    function openEditTransaction(transId) { const t=transactions.find(t=>t.id===transId); if(t){ editingTransId=transId; document.getElementById("transType").value=t.type; document.getElementById("transAmount").value=t.amount; document.getElementById("paymentMethod").value=t.paymentMethod||"نقدية"; document.getElementById("transDesc").value=t.description||""; document.getElementById("transModal").style.display="flex"; } }
+    function deleteTransaction(transId) { if(confirm("حذف المعاملة نهائياً؟")){ transactions=transactions.filter(t=>t.id!==transId); saveToLocal(); if(currentOpenClient){ renderClientTransactions(currentOpenClient); updateClientStatsFooter(currentOpenClient); } renderClientsList(); renderBalances(); showToast("تم الحذف"); } }
+    function addTransactionForCurrentClient() { if(!currentOpenClient) return; const type=document.getElementById("transType").value; const amount=parseFloat(document.getElementById("transAmount").value); const payment=document.getElementById("paymentMethod").value; const desc=document.getElementById("transDesc").value; if(isNaN(amount)||amount<=0){ showToast("المبلغ غير صحيح"); return; } const today=new Date().toISOString().slice(0,10); if(editingTransId){ const idx=transactions.findIndex(t=>t.id===editingTransId); if(idx!==-1){ transactions[idx]={...transactions[idx], type, amount, paymentMethod:payment, description:desc, date:today }; showToast("تم التعديل"); } editingTransId=null; } else { transactions.push({ id:Date.now(), clientName:currentOpenClient, date:today, type, amount, description:desc, paymentMethod:payment }); showToast("تم إضافة المعاملة"); } saveToLocal(); if(currentOpenClient){ renderClientTransactions(currentOpenClient); updateClientStatsFooter(currentOpenClient); } renderClientsList(); renderBalances(); document.getElementById("transModal").style.display="none"; document.getElementById("transAmount").value=""; document.getElementById("transDesc").value=""; }
+    let currentEditClientId=null;
+    function openAddClientModal(editId=null){ currentEditClientId=editId; const title=document.getElementById("clientFormTitle"); if(editId){ title.innerText="✏️ تعديل عميل"; const c=clients.find(c=>c.id===editId); if(c){ document.getElementById("clientName").value=c.name; document.getElementById("clientPhone").value=c.phone||""; document.getElementById("creditLimit").value=c.creditLimit||""; document.getElementById("clientNotes").value=c.notes||""; } } else { title.innerText="➕ عميل جديد"; document.getElementById("clientName").value=""; document.getElementById("clientPhone").value=""; document.getElementById("creditLimit").value=""; document.getElementById("clientNotes").value=""; } document.getElementById("openingCheck").checked=false; document.getElementById("openingFields").style.display="none"; document.getElementById("addClientModal").style.display="flex"; }
+    function saveClientFromModal(){ const name=document.getElementById("clientName").value.trim(); if(!name){ showToast("الاسم مطلوب"); return; } const phone=document.getElementById("clientPhone").value; const creditLimit=parseFloat(document.getElementById("creditLimit").value)||null; const notes=document.getElementById("clientNotes").value; const addOpening=document.getElementById("openingCheck").checked; const openingAmount=addOpening?parseFloat(document.getElementById("openingAmount").value):0; const openingType=document.getElementById("openingType").value; if(currentEditClientId){ const idx=clients.findIndex(c=>c.id===currentEditClientId); if(idx!==-1){ clients[idx]={...clients[idx], name, phone, creditLimit, notes }; showToast("تم التعديل"); } } else { const newId=Date.now(); clients.push({ id:newId, name, phone, creditLimit, notes }); if(addOpening && openingAmount>0){ const today=new Date().toISOString().slice(0,10); const transType=openingType==="paid"?"قبض":"صرف"; transactions.push({ id:Date.now(), clientName:name, date:today, type:transType, amount:openingAmount, description:"رصيد افتتاحي", paymentMethod:"نقدية" }); showToast("تم إضافة الرصيد الافتتاحي"); } showToast("تم إضافة العميل"); } saveToLocal(); renderBalances(); renderClientsList(); document.getElementById("addClientModal").style.display="none"; if(document.getElementById("clientsModal").style.display==="flex") renderClientsList(); }
+    function editClientById(id){ openAddClientModal(id); }
+    function deleteClientById(id){ if(confirm("حذف العميل سيحذف كل معاملاته؟")){ const client=clients.find(c=>c.id===id); if(client){ transactions=transactions.filter(t=>t.clientName!==client.name); clients=clients.filter(c=>c.id!==id); saveToLocal(); renderBalances(); renderClientsList(); showToast("تم حذف العميل"); } } }
+    let currentAccount=null;
+    function openAccountModal(acc){ currentAccount=acc; document.getElementById("accountModalTitle").innerHTML=`💰 حساب ${acc}`; document.getElementById("accAmount").value=""; document.getElementById("accDesc").value=""; document.getElementById("accountModal").style.display="flex"; }
+    function processAccountOperation(){ const amount=parseFloat(document.getElementById("accAmount").value); const op=document.getElementById("accOperation").value; if(isNaN(amount)||amount<=0){ showToast("أدخل مبلغ صحيح"); return; } const today=new Date().toISOString().slice(0,10); transactions.push({ id:Date.now(), accountName:currentAccount, date:today, type:op==="add"?"إضافة":"خصم", amount:amount, description:document.getElementById("accDesc").value, paymentMethod:"نقدية" }); saveToLocal(); renderBalances(); showToast(`تم ${op==="add"?"إضافة":"خصم"} ${amount.toLocaleString()} ريال`); document.getElementById("accountModal").style.display="none"; }
+    
+    // وظائف الطباعة والمشاركة والتصدير
+    function generatePlainText(clientName, type) { const trans=transactions.filter(t=>t.clientName===clientName).sort((a,b)=>new Date(a.date)-new Date(b.date)); let totalIn=0,totalOut=0; trans.forEach(t=>{if(t.type==="قبض") totalIn+=t.amount; else totalOut+=t.amount;}); let lines=[`=================================`,`${type==="statement"?"📄 كشف حساب":"📄 مصادقة الرصيد"} : ${clientName}`,`التاريخ: ${new Date().toLocaleDateString('ar-EG')}`]; if(type==="statement"){ lines.push(`التاريخ | النوع | البيان | المبلغ`); trans.forEach(t=>{lines.push(`${t.date} | ${t.type==="قبض"?"سند قبض":"سند صرف"} | ${t.description||"—"} (${t.paymentMethod||"نقدية"}) | ${t.amount.toLocaleString()}`);});} lines.push(`💰 له: ${totalIn.toLocaleString()} ريال`,`📉 عليه: ${totalOut.toLocaleString()} ريال`,`⚖️ الرصيد: ${(totalIn-totalOut).toLocaleString()} ريال`); return lines.join("\n"); }
+    function generateHtmlPrint(clientName, type) { const trans=transactions.filter(t=>t.clientName===clientName).sort((a,b)=>new Date(a.date)-new Date(b.date)); let totalIn=0,totalOut=0; trans.forEach(t=>{if(t.type==="قبض") totalIn+=t.amount; else totalOut+=t.amount;}); let rows=""; trans.forEach(t=>{rows+=`<tr><td>${t.date}</td><td>${t.type==="قبض"?"سند قبض":"سند صرف"}</td><td>${t.description||"—"} (${t.paymentMethod||"نقدية"})</td><td>${t.amount.toLocaleString()}</td></tr>`;}); return `<!DOCTYPE html><html dir="rtl"><head><meta charset="UTF-8"><title>${type==="statement"?"كشف حساب":"مصادقة"}</title><style>body{font-family:Cairo;padding:20px;}table{border-collapse:collapse;width:100%}th,td{border:1px solid #aaa;padding:8px;text-align:center}</style></head><body><h2>${type==="statement"?"كشف حساب":"مصادقة الرصيد"} : ${clientName}</h2><p>التاريخ: ${new Date().toLocaleDateString('ar-EG')}</p>${type==="statement"?`<table><thead><tr><th>التاريخ</th><th>النوع</th><th>البيان</th><th>المبلغ</th></tr></thead><tbody>${rows}</tbody></table>`:""}<div><p>💰 له: ${totalIn.toLocaleString()} ريال</p><p>📉 عليه: ${totalOut.toLocaleString()} ريال</p><p>⚖️ الرصيد: ${(totalIn-totalOut).toLocaleString()} ريال</p></div></body></html>`; }
+    async function sharePlainText(clientName, type) { const text=generatePlainText(clientName,type); if(navigator.share) try{ await navigator.share({title:`${clientName}`, text}); showToast("تمت المشاركة"); }catch(e){ showToast("ألغيت"); } else { await navigator.clipboard.writeText(text); showToast("تم نسخ النص"); } }
+    function printDocument(clientName,type) { const win=window.open(); win.document.write(generateHtmlPrint(clientName,type)); win.document.close(); win.print(); }
+    function exportExcel(clientName) { let csv=[["التاريخ","النوع","البيان","المبلغ"]]; transactions.filter(t=>t.clientName===clientName).forEach(t=>{csv.push([t.date, t.type==="قبض"?"سند قبض":"سند صرف", `${t.description||""} (${t.paymentMethod||"نقدية"})`, t.amount]);}); const blob=new Blob(["\uFEFF"+csv.map(r=>r.join(",")).join("\n")],{type:"text/csv"}); const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=`${clientName}_كشف.xls`; a.click(); URL.revokeObjectURL(a.href); showToast("تم التصدير"); }
+    function showActionDialog(clientName) { const container=document.getElementById("actionButtonsContainer"); document.getElementById("dialogClientName").innerHTML=`📌 ${clientName}`; container.innerHTML=""; const actions=[ {icon:"🖨️",label:"طباعة كشف حساب", act:()=>printDocument(clientName,"statement")}, {icon:"📤",label:"مشاركة كشف حساب (نص)", act:()=>sharePlainText(clientName,"statement")}, {icon:"📊",label:"تصدير إكسل", act:()=>exportExcel(clientName)}, {icon:"📄",label:"طباعة مصادقة الرصيد", act:()=>printDocument(clientName,"balance")}, {icon:"💬",label:"مشاركة مصادقة (نص)", act:()=>sharePlainText(clientName,"balance")} ]; actions.forEach(a=>{const btn=document.createElement("button"); btn.className="action-btn-custom"; btn.innerHTML=`${a.icon} ${a.label}`; btn.onclick=()=>{ document.getElementById("actionDialog").style.display="none"; a.act(); }; container.appendChild(btn);}); document.getElementById("actionDialog").style.display="flex"; }
+    function showToast(msg) { const t=document.getElementById("toast"); t.innerText=msg; t.style.display="block"; setTimeout(()=>t.style.display="none",2500); }
+    
+    // ================== النسخ الاحتياطي المحلي ==================
+    function downloadBackup() {
+        const backupData = { clients, transactions, accounts, backupDate: new Date().toISOString() };
+        const fileContent = JSON.stringify(backupData, null, 2);
+        const blob = new Blob([fileContent], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `backup_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        const now = new Date().toLocaleString();
+        localStorage.setItem("premiumLastBackupTime", now);
+        document.getElementById("premiumLastBackup").innerText = now;
+        showPremiumToast("✅ تم تحميل النسخة الاحتياطية بنجاح!");
+    }
+    function updateDataSizeUI() { try { const size = (JSON.stringify({ clients, transactions }).length / 1024).toFixed(2); document.getElementById("premiumDataSize").innerText = size + " KB"; } catch(e) {} }
+    function showPremiumToast(msg) { const toast = document.getElementById("premiumToast"); toast.innerText = msg; toast.style.display = "block"; setTimeout(()=>toast.style.display="none", 3000); }
+    const drawer = document.getElementById("premiumDrawer"); const openBtn = document.getElementById("legendaryMenuBtn"); const closeBtn = document.getElementById("closeDrawerPremiumBtn");
+    function openDrawer() { drawer.classList.add("open"); updateDataSizeUI(); }
+    function closeDrawer() { drawer.classList.remove("open"); }
+    openBtn.onclick = openDrawer; closeBtn.onclick = closeDrawer;
+    document.addEventListener("click", (e) => { if(drawer.classList.contains("open") && !drawer.contains(e.target) && !openBtn.contains(e.target)) closeDrawer(); });
+    document.getElementById("premiumBackupBtn").onclick = downloadBackup;
+    const lastBack = localStorage.getItem("premiumLastBackupTime");
+    if(lastBack) document.getElementById("premiumLastBackup").innerText = lastBack;
+    setInterval(updateDataSizeUI, 5000);
+    
+    // ربط الأزرار
+    document.getElementById("openAddClientMain").onclick = ()=>openAddClientModal();
+    document.getElementById("saveClientBtn").onclick = saveClientFromModal;
+    document.getElementById("cancelClientBtn").onclick = ()=>document.getElementById("addClientModal").style.display="none";
+    document.getElementById("closeClientsModal").onclick = ()=>document.getElementById("clientsModal").style.display="none";
+    document.getElementById("closeDetailModal").onclick = ()=>document.getElementById("clientDetailModal").style.display="none";
+    document.getElementById("openAddTransForClient").onclick = ()=>{ editingTransId=null; document.getElementById("transType").value="قبض"; document.getElementById("transAmount").value=""; document.getElementById("transDesc").value=""; document.getElementById("transModal").style.display="flex"; };
+    document.getElementById("confirmTransBtn").onclick = addTransactionForCurrentClient;
+    document.getElementById("cancelTransBtn").onclick = ()=>document.getElementById("transModal").style.display="none";
+    document.getElementById("saveAccountOp").onclick = processAccountOperation;
+    document.getElementById("closeAccountModal").onclick = ()=>document.getElementById("accountModal").style.display="none";
+    document.getElementById("closeActionDialog").onclick = ()=>document.getElementById("actionDialog").style.display="none";
+    document.getElementById("openingCheck").onchange = (e)=>document.getElementById("openingFields").style.display = e.target.checked?"block":"none";
+    document.getElementById("themeToggle").onclick = ()=>{ document.body.classList.toggle("dark"); localStorage.setItem("theme", document.body.classList.contains("dark")?"dark":"light"); document.getElementById("themeToggle").innerHTML = document.body.classList.contains("dark")?"☀️":"🌙"; };
+    document.getElementById("currentDate").innerHTML = new Date().toLocaleDateString('ar-EG', { year:'numeric', month:'long', day:'numeric' });
+    if(localStorage.getItem("theme")==="dark") document.body.classList.add("dark");
+    loadData();
+</script>
+<script>
+    (function() {
+        // الانتظار حتى يتم تحميل الصفحة بالكامل
+        window.addEventListener('DOMContentLoaded', function() {
+            // البحث عن القائمة الجانبية (premium-drawer)
+            const drawer = document.querySelector('.premium-drawer');
+            if (!drawer) {
+                console.error("لم يتم العثور على القائمة الجانبية");
+                return;
+            }
+            
+            // البحث عن مكان إضافة الزر (قبل stats-premium أو في نهاية المحتوى)
+            const statsDiv = drawer.querySelector('.stats-premium');
+            if (!statsDiv) return;
+            
+            // التحقق من عدم وجود الزر مسبقاً
+            if (document.getElementById('restoreBackupBtn')) return;
+            
+            // إنشاء زر الاستعادة
+            const restoreBtn = document.createElement('button');
+            restoreBtn.id = 'restoreBackupBtn';
+            restoreBtn.className = 'btn-backup-premium';
+            restoreBtn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+            restoreBtn.style.marginTop = '12px';
+            restoreBtn.innerHTML = '<span>🔄</span> استعادة نسخة احتياطية (JSON)';
+            
+            // إنشاء input file مخفي
+            const fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.id = 'restoreFileInput';
+            fileInput.accept = '.json';
+            fileInput.style.display = 'none';
+            
+            // إضافة العناصر إلى القائمة (قبل stats-premium)
+            statsDiv.parentNode.insertBefore(restoreBtn, statsDiv);
+            statsDiv.parentNode.insertBefore(fileInput, statsDiv);
+            
+            // ربط الحدث بالزر
+            restoreBtn.onclick = () => {
+                fileInput.click();
+            };
+            
+            // معالجة اختيار الملف
+            fileInput.onchange = (event) => {
+                const file = event.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const backup = JSON.parse(e.target.result);
+                        // التحقق من صحة البيانات
+                        if (backup.clients !== undefined) window.clients = backup.clients;
+                        if (backup.transactions !== undefined) window.transactions = backup.transactions;
+                        if (backup.accounts !== undefined) window.accounts = backup.accounts;
+                        
+                        // حفظ البيانات إلى localStorage
+                        if (typeof window.saveToLocal === 'function') window.saveToLocal();
+                        if (typeof window.updateAccountsTotals === 'function') window.updateAccountsTotals();
+                        if (typeof window.renderBalances === 'function') window.renderBalances();
+                        if (typeof window.renderClientsList === 'function') window.renderClientsList();
+                        
+                        // عرض رسالة نجاح
+                        if (typeof window.showPremiumToast === 'function') {
+                            window.showPremiumToast("✅ تم استعادة البيانات بنجاح! إعادة تحميل الصفحة...");
+                        } else if (typeof window.showToast === 'function') {
+                            window.showToast("✅ تم استعادة البيانات بنجاح! إعادة تحميل الصفحة...");
+                        } else {
+                            alert("تم استعادة البيانات بنجاح!");
+                        }
+                        
+                        // إعادة تحميل الصفحة بعد 1.5 ثانية لتحديث كل شيء
+                        setTimeout(() => location.reload(), 1500);
+                    } catch (err) {
+                        if (typeof window.showPremiumToast === 'function') {
+                            window.showPremiumToast("❌ الملف غير صالح أو تالف", true);
+                        } else if (typeof window.showToast === 'function') {
+                            window.showToast("❌ الملف غير صالح أو تالف");
+                        } else {
+                            alert("الملف غير صالح");
+                        }
+                    }
+                };
+                reader.readAsText(file);
+            };
+        });
+    })();
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').then(reg => {
+    console.log('Service Worker مسجل بنجاح', reg);
+  }).catch(err => {
+    console.log('فشل التسجيل', err);
+  });
+}
+</script>
+</body>
+</html>
