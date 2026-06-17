@@ -1,0 +1,25 @@
+{
+  "background_color": "rgb(0, 114, 255)",
+  "dir": "ltr",
+  "display": "standalone",
+  "name": "المحاسب الذكي",
+  "orientation": "any",
+  "scope": "/",
+  "short_name": "حساباتي",
+  "start_url": "/",
+  "theme_color": "rgb(10, 15, 30)",
+  "icons": [
+    {
+      "src": "https://alghrbe155-prog.github.io/my-accountant/icons/icon-152.png",
+      "isSquare": false,
+      "isPng": true,
+      "isWebp": false,
+      "isJpg": false,
+      "width": 0,
+      "is512x512": false,
+      "is256x256": false,
+      "is192x192": false
+    }
+  ],
+  "description": "نظام محاسبي متكامل لإدارة العملاء والمعاملات المالية مع نسخ احتياطي"
+}
